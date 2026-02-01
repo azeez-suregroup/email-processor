@@ -16,11 +16,8 @@ export async function POST(request: NextRequest) {
   try {
     const { to, subject, htmlContent, honeypot } = await request.json();
 
-    console.log("Email request received:", { to, subject, hasHtmlContent: !!htmlContent });
-
     // Anti-bot check: honeypot field should be empty
     if (honeypot) {
-      console.warn("Bot detected: honeypot field was filled");
       return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
     }
 
@@ -44,10 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Rate limit check passed. Remaining: ${rateLimitResult.remaining}`);
-
     if (!process.env.SENDGRID_API_KEY) {
-      console.error("SendGrid API key is missing");
       return NextResponse.json(
         { error: "SendGrid API key is not configured. Please set SENDGRID_API_KEY in your .env.local file" },
         { status: 500 },
@@ -55,7 +49,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!process.env.SENDGRID_FROM_EMAIL) {
-      console.error("SendGrid from email is missing");
       return NextResponse.json(
         { error: "SendGrid sender email is not configured. Please set SENDGRID_FROM_EMAIL in your .env.local file" },
         { status: 500 },
@@ -63,7 +56,6 @@ export async function POST(request: NextRequest) {
     }
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL;
-    console.log("Sending email:", { to, from: fromEmail, subject });
 
     const inlinedHtml = juice(htmlContent);
 
@@ -85,12 +77,10 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    const result = await sgMail.send(msg);
-    console.log("SendGrid response:", result);
+    await sgMail.send(msg);
 
     return NextResponse.json({ success: true, message: "Email sent successfully" }, { status: 200 });
   } catch (error: unknown) {
-    console.error("Error sending email:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json({ error: "Failed to send email", details: errorMessage }, { status: 500 });
   }

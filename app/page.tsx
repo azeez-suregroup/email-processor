@@ -39,8 +39,7 @@ export default function Home() {
       } else {
         setMessage(`❌ Error: ${data.error || "Failed to preview HTML"}`);
       }
-    } catch (error) {
-      console.error("Preview error:", error);
+    } catch {
       setMessage("❌ Error: Failed to preview HTML");
     }
   };
@@ -82,8 +81,7 @@ export default function Home() {
       } else {
         setMessage(`❌ Error: ${data.error || "Failed to send email"}`);
       }
-    } catch (error) {
-      console.error("Send email error:", error);
+    } catch {
       setMessage("❌ Error: Failed to send email");
     } finally {
       setLoading(false);
