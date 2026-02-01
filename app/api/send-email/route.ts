@@ -26,9 +26,20 @@ export async function POST(request: NextRequest) {
 
     const msg = {
       to,
-      from: fromEmail,
+      from: {
+        email: fromEmail,
+        name: "Suregifts",
+      },
       subject,
       html: inlinedHtml,
+      trackingSettings: {
+        clickTracking: {
+          enable: false,
+        },
+        openTracking: {
+          enable: false,
+        },
+      },
     };
 
     const result = await sgMail.send(msg);

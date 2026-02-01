@@ -105,7 +105,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full">
+              <Button type="submit" disabled={loading} className="w-full cursor-pointer">
                 {loading ? "Sending..." : "Send Email"}
               </Button>
 
