@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HTML Email Sender with Inline CSS Conversion
 
-## Getting Started
+A Next.js application that converts HTML content with `<style>` tags to inline CSS and sends emails via SendGrid.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 📧 Send emails via SendGrid API
+- 🎨 Automatic conversion of `<style>` tags to inline CSS using [juice](https://github.com/Automattic/juice)
+- 🖥️ Single-page interface built with shadcn/ui components
+- 🌙 Dark mode support
+- ⚡ Built with Next.js 15 and TypeScript
+
+## Prerequisites
+
+- Node.js 18+ installed
+- A SendGrid account and API key ([Get one here](https://sendgrid.com/))
+
+## Setup
+
+1. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Configure SendGrid API Key:**
+
+   Create a `.env.local` file in the root directory:
+
+   ```bash
+   SENDGRID_API_KEY=your_sendgrid_api_key_here
+   SENDGRID_FROM_EMAIL=your_verified_sender@example.com
+   ```
+
+   > **Important:**
+   >
+   > - Get your API key from [SendGrid Settings > API Keys](https://app.sendgrid.com/settings/api_keys)
+   > - The `SENDGRID_FROM_EMAIL` must be a verified sender in your SendGrid account
+   > - Never commit `.env.local` to version control (it's already in `.gitignore`)
+
+3. **Run the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Open the application:**
+
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+1. Enter the recipient's email address
+2. Add an email subject
+3. Paste your HTML content with `<style>` tags in the textarea
+4. Click "Send Email"
+
+The application will automatically:
+
+- Extract CSS from `<style>` tags
+- Convert it to inline styles
+- Send the email via SendGrid
+
+### Example HTML Input
+
+```html
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  th {
+    background-color: #4caf50;
+    color: white;
+  }
+</style>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+  </tr>
+  <tr>
+    <td>John Doe</td>
+    <td>john@example.com</td>
+  </tr>
+</table>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework:** Next.js 15 (App Router)
+- **UI Components:** shadcn/ui
+- **Styling:** Tailwind CSS
+- **Email Service:** SendGrid
+- **CSS Inliner:** juice
+- **Language:** TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+├── app/
+│   ├── api/
+│   │   └── send-email/
+│   │       └── route.ts          # SendGrid API endpoint
+│   ├── page.tsx                   # Main UI page
+│   └── globals.css                # Global styles
+├── components/
+│   └── ui/                        # shadcn/ui components
+├── lib/
+│   └── utils.ts                   # Utility functions
+└── .env.local                     # Environment variables (create this)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## API Endpoint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**POST** `/api/send-email`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Request body:
 
-## Deploy on Vercel
+```json
+{
+  "to": "recipient@example.com",
+  "subject": "Email subject",
+  "htmlContent": "<style>...</style><html>...</html>"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Response (success):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "success": true,
+  "message": "Email sent successfully"
+}
+```
+
+## Troubleshooting
+
+- **"SendGrid API key is not configured"**: Make sure `.env.local` exists with `SENDGRID_API_KEY`
+- **"Failed to send email"**: Check that your SendGrid API key is valid and the sender email is verified
+- **Styles not applying**: Ensure your CSS is inside `<style>` tags in the HTML content
+
+## License
+
+MIT
