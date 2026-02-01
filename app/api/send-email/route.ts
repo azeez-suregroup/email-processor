@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import sgMail from "@sendgrid/mail";
 import juice from "juice";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || "");
+// Validate API key at module initialization
+if (!process.env.SENDGRID_API_KEY) {
+  console.error("CRITICAL: SENDGRID_API_KEY environment variable is not set");
+}
+
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,10 +23,21 @@ export async function POST(request: NextRequest) {
 
     if (!process.env.SENDGRID_API_KEY) {
       console.error("SendGrid API key is missing");
-      return NextResponse.json({ error: "SendGrid API key is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "SendGrid API key is not configured. Please set SENDGRID_API_KEY in your .env.local file" },
+        { status: 500 },
+      );
     }
 
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || to;
+    if (!process.env.SENDGRID_FROM_EMAIL) {
+      console.error("SendGrid from email is missing");
+      return NextResponse.json(
+        { error: "SendGrid sender email is not configured. Please set SENDGRID_FROM_EMAIL in your .env.local file" },
+        { status: 500 },
+      );
+    }
+
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL;
     console.log("Sending email:", { to, from: fromEmail, subject });
 
     const inlinedHtml = juice(htmlContent);

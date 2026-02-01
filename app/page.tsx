@@ -10,8 +10,8 @@ import { Mail, Send, CheckCircle, AlertCircle, Code, Sparkles, Eye, X } from "lu
 
 export default function Home() {
   const [htmlContent, setHtmlContent] = useState("");
-  const [to, setTo] = useState("a6ee6@yahoo.com");
-  const [subject, setSubject] = useState("Test Email");
+  const [to, setTo] = useState("");
+  const [subject, setSubject] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
@@ -39,11 +39,12 @@ export default function Home() {
         setMessage(`❌ Error: ${data.error || "Failed to preview HTML"}`);
       }
     } catch (error) {
+      console.error("Preview error:", error);
       setMessage("❌ Error: Failed to preview HTML");
     }
   };
 
-  const handleSendEmail = async () => {
+  const sendEmail = async (htmlToSend: string, resetForm: boolean = false) => {
     setLoading(true);
     setMessage("");
 
@@ -56,7 +57,7 @@ export default function Home() {
         body: JSON.stringify({
           to,
           subject,
-          htmlContent,
+          htmlContent: htmlToSend,
         }),
       });
 
@@ -64,55 +65,43 @@ export default function Home() {
 
       if (response.ok) {
         setMessage("✅ Email sent successfully!");
-        setHtmlContent("");
-        setTo("a6ee6@yahoo.com");
-        setSubject("Test Email");
+        if (resetForm) {
+          setHtmlContent("");
+          setTo("");
+          setSubject("");
+        }
       } else {
         setMessage(`❌ Error: ${data.error || "Failed to send email"}`);
       }
     } catch (error) {
+      console.error("Send email error:", error);
       setMessage("❌ Error: Failed to send email");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSendEmail = async () => {
+    await sendEmail(htmlContent, true);
+  };
+
   const handleSendFromPreview = async () => {
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to,
-          subject,
-          htmlContent: previewHtml,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("✅ Email sent successfully!");
-        handleCancelPreview();
-      } else {
-        setMessage(`❌ Error: ${data.error || "Failed to send email"}`);
-      }
-    } catch (error) {
-      setMessage("❌ Error: Failed to send email");
-    } finally {
-      setLoading(false);
+    await sendEmail(previewHtml, false);
+    // Close preview after successful send (message is already set by sendEmail)
+    if (message.includes("✅")) {
+      setTimeout(() => {
+        setShowPreview(false);
+        setPreviewHtml("");
+        setHtmlContent("");
+        setTo("");
+        setSubject("");
+      }, 2000);
     }
   };
 
   const handleCancelPreview = () => {
     setShowPreview(false);
     setPreviewHtml("");
-    setMessage("");
   };
 
   return (
@@ -294,9 +283,8 @@ export default function Home() {
                 {/* Action Buttons */}
                 <div className="flex gap-4">
                   <Button
-                    type="button"
-                    onClick={handleSendEmail}
-                    disabled={loading || !htmlContent}
+                    type="submit"
+                    disabled={loading || !htmlContent || !to || !subject}
                     className="flex-1 h-12 text-base font-medium cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     {loading ? (
@@ -315,7 +303,7 @@ export default function Home() {
                   <Button
                     type="button"
                     onClick={handlePreview}
-                    disabled={!htmlContent}
+                    disabled={!htmlContent || loading}
                     variant="outline"
                     className="flex-1 h-12 text-base font-medium cursor-pointer border-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-all duration-200"
                   >
