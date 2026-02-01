@@ -16,6 +16,7 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const handlePreview = async () => {
     if (!htmlContent) return;
@@ -48,6 +49,13 @@ export default function Home() {
     setLoading(true);
     setMessage("");
 
+    // Anti-bot check: if honeypot field is filled, reject silently
+    if (honeypot) {
+      setMessage("❌ Error: Invalid submission detected");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/send-email", {
         method: "POST",
@@ -58,6 +66,7 @@ export default function Home() {
           to,
           subject,
           htmlContent: htmlToSend,
+          honeypot,
         }),
       });
 
@@ -114,12 +123,11 @@ export default function Home() {
               <Mail className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
-            HTML Email Sender
-          </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Transform HTML with styles into beautiful emails with inline CSS and send them via SendGrid
-          </p>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+            <Mail className="w-8 h-8 text-blue-600" />
+            StyleSend
+          </CardTitle>
+          <CardDescription className="text-lg">Transform HTML with styles into beautiful emails with inline CSS</CardDescription>
         </div>
 
         {/* Preview View */}
@@ -278,6 +286,18 @@ export default function Home() {
                       client compatibility.
                     </p>
                   </div>
+                </div>
+
+                {/* Honeypot field - hidden from users, catches bots */}
+                <div className="absolute opacity-0 pointer-events-none" aria-hidden="true">
+                  <Input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
                 </div>
 
                 {/* Action Buttons */}

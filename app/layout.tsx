@@ -13,8 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HTML Email Sender | SendGrid Email Tool",
-  description: "Transform HTML with styles into beautiful emails with inline CSS and send them via SendGrid",
+  title: "StyleSend | Transform HTML into Beautiful Emails",
+  description: "StyleSend - Transform HTML with styles into beautiful emails with inline CSS and send them via SendGrid",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({
